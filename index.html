@@ -7,248 +7,260 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    
-    <style>
-        :root {
-            --primary: #6c5ce7;
-            --accent: #fdcb6e;
-            --glass: rgba(255, 255, 255, 0.85);
-        }
 
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Prompt', sans-serif;
-            background: #f0f2f5;
-            height: 100vh; overflow: hidden;
+    <style>
+        * { box-sizing: border-box; }
+        body, html {
+            margin: 0; padding: 0; font-family: 'Prompt', sans-serif;
+            background-color: #e9ecef; height: 100vh; overflow: hidden;
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* พื้นหลังโรงเรียนแบบเบลอ */
+        /* พื้นหลังโรงเรียนเบลอ */
         .bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: url('https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=1920') center/cover;
-            filter: blur(10px) brightness(0.7);
-            z-index: -2;
+            filter: blur(12px) brightness(0.7); z-index: -2;
         }
 
-        /* อิโมจิการ์ตูนเคลื่อนไหว */
-        .floating-emojis {
-            position: fixed; width: 100%; height: 100%; z-index: -1;
-            pointer-events: none; overflow: hidden;
-        }
-        .emoji {
-            position: absolute; bottom: -50px; font-size: 2rem;
-            animation: float 12s linear infinite; opacity: 0.7;
-        }
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.7; }
-            90% { opacity: 0.7; }
-            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
-        }
+        /* อิโมจิลอย */
+        .floating-bg { position: fixed; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .floating-bg span { position: absolute; bottom: -50px; font-size: 2rem; opacity: 0.6; animation: floatUp linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-120vh) rotate(360deg); } }
 
-        /* Main Container */
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            width: 90%; max-width: 900px;
-            text-align: center; border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .header h1 { color: var(--primary); margin: 0; font-size: 2rem; }
-        .header p { color: #666; margin: 5px 0 20px; font-size: 1rem; }
-
-        /* Video Area */
-        .camera-box {
+        /* UI หลัก */
+        .app-container {
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
+            border-radius: 20px; padding: 30px; width: 95%; max-width: 850px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(255,255,255,0.5);
             position: relative;
-            background: #000; border-radius: 16px;
-            overflow: hidden; aspect-ratio: 16/9;
-            margin-bottom: 20px; border: 4px solid white;
         }
-        #video { width: 100%; height: 100%; object-fit: cover; }
-        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-        /* Info Display */
-        .status-bar {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
-            margin-bottom: 20px;
-        }
-        .info-card {
-            background: white; padding: 15px; border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .info-card i { font-size: 1.5rem; color: var(--primary); margin-bottom: 5px; }
-        .info-card span { display: block; font-weight: 600; color: #333; }
+        .header h1 { color: #4b4b4b; margin: 0; font-size: 2.2rem; text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
+        .header p { color: #666; margin: 5px 0 20px; font-size: 1.1rem; }
 
-        /* Buttons */
+        /* กล่องวิดีโอ (ต้องกำหนดขนาดให้ชัดเจน AI ถึงจะวาดกรอบตรง) */
+        .video-wrapper {
+            position: relative; width: 640px; height: 480px; margin: 0 auto 20px;
+            background: #000; border-radius: 12px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex; justify-content: center; align-items: center;
+        }
+        #video { position: absolute; top: 0; left: 0; width: 640px; height: 480px; object-fit: cover; }
+        #overlay { position: absolute; top: 0; left: 0; z-index: 10; }
+        #system-status { position: absolute; z-index: 5; color: white; font-weight: bold; font-size: 1.2rem; }
+
+        /* กล่องแสดงผลอารมณ์ */
+        .info-panel {
+            display: flex; justify-content: space-around; background: white; padding: 15px;
+            border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .info-box { flex: 1; }
+        .info-box span { display: block; font-size: 1.2rem; font-weight: bold; color: #6c5ce7; margin-top: 5px; }
+
         .btn-admin {
-            background: var(--primary); color: white; border: none;
-            padding: 10px 25px; border-radius: 50px; cursor: pointer;
-            font-family: 'Prompt'; font-weight: 600; transition: 0.3s;
+            background: #6c5ce7; color: white; border: none; padding: 12px 30px; font-size: 1rem;
+            border-radius: 30px; cursor: pointer; transition: 0.3s; font-family: 'Prompt'; font-weight: 600;
         }
-        .btn-admin:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); }
+        .btn-admin:hover { background: #5a4bcf; transform: scale(1.05); }
 
-        footer { margin-top: 15px; color: #888; font-size: 0.8rem; }
+        footer { margin-top: 20px; color: #555; font-size: 0.9rem; font-weight: 600; }
 
-        /* Modal */
+        /* Modal แอดมิน */
         .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 100;
-            display: none; justify-content: center; align-items: center;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8);
+            z-index: 100; display: none; justify-content: center; align-items: center;
         }
-        .modal-content {
-            background: white; padding: 30px; border-radius: 20px;
-            width: 80%; max-width: 600px; max-height: 80vh; overflow-y: auto;
-        }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 700px; max-height: 80vh; overflow-y: auto; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        table, th, td { border: 1px solid #ddd; } th, td { padding: 10px; text-align: left; } th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
     <div class="bg-overlay"></div>
-    <div class="floating-emojis" id="emojiContainer"></div>
+    <div class="floating-bg" id="emoji-container"></div>
 
-    <div class="glass-panel">
+    <div class="app-container">
         <div class="header">
             <h1><i class="fas fa-school"></i> ห้องเรียนแห่งความสุขของครูบิ๊กกี้</h1>
             <p>ระบบตรวจเช็คใบหน้า พฤติกรรมของนักเรียน</p>
         </div>
 
-        <div class="camera-box">
-            <video id="video" autoplay muted></video>
-            <canvas id="overlay"></canvas>
+        <div class="video-wrapper">
+            <div id="system-status"><i class="fas fa-spinner fa-spin"></i> กำลังโหลดระบบ AI... กรุณารอสักครู่</div>
+            <video id="video" width="640" height="480" autoplay muted playsinline></video>
+            <canvas id="overlay" width="640" height="480"></canvas>
         </div>
 
-        <div class="status-bar">
-            <div class="info-card">
-                <i class="fas fa-smile"></i>
-                <small>อารมณ์ปัจจุุบัน</small>
-                <span id="emotionText">รอการตรวจจับ...</span>
+        <div class="info-panel">
+            <div class="info-box">
+                <small><i class="fas fa-smile"></i> อารมณ์ปัจจุบัน</small>
+                <span id="emotion-text">รอการตรวจจับ...</span>
             </div>
-            <div class="info-card">
-                <i class="fas fa-walking"></i>
-                <small>พฤติกรรม</small>
-                <span id="behaviorText">ปกติ</span>
+            <div class="info-box">
+                <small><i class="fas fa-child"></i> พฤติกรรม / ท่าทาง</small>
+                <span id="behavior-text">ปกติ</span>
             </div>
         </div>
 
-        <button class="btn-admin" onclick="openAdmin()">
-            <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
-        </button>
-
-        <footer>Dev. by BigGy | © 2024 Classroom AI System</footer>
+        <button class="btn-admin" onclick="openAdmin()"><i class="fas fa-lock"></i> เข้าสู่ระบบแอดมิน</button>
+        <footer>Dev. by BigGy | © 2024</footer>
     </div>
 
-    <div id="adminModal" class="modal">
+    <div class="modal" id="adminModal">
         <div class="modal-content">
-            <h2 style="margin-top:0">ระบบแอดมิน</h2>
-            <div id="authArea">
-                <input type="password" id="adminPass" placeholder="ใส่รหัสผ่าน..." style="width:100%; padding:10px; margin-bottom:10px;">
-                <button onclick="login()" class="btn-admin">ตกลง</button>
+            <h2>ข้อมูลหลังบ้าน</h2>
+            <div id="login-section">
+                <input type="password" id="admin-pass" placeholder="ใส่รหัสผ่าน 880 บิ๊กกี้ok" style="padding:10px; width:80%; margin-bottom:10px; font-family:'Prompt';">
+                <br>
+                <button class="btn-admin" onclick="fetchData()">ดูข้อมูล</button>
             </div>
-            <div id="dataArea" style="display:none">
-                <div id="logTable">กำลังดึงข้อมูล...</div>
+            <div id="data-section" style="display:none;">
+                <div id="table-container"></div>
             </div>
-            <br>
-            <button onclick="closeAdmin()" style="border:none; background:none; color:red; cursor:pointer">ปิดหน้าต่าง</button>
+            <br><br>
+            <button onclick="closeAdmin()" style="background: none; border: none; color: red; cursor: pointer; font-family:'Prompt'; text-decoration: underline;">ปิดหน้าต่าง</button>
         </div>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxJgSQkUlPt5J4fsmU0kNkD1QS0iMdYwt8OyaLCYPiqF4uILipB1qBJFExEByEFFNd5/exec";
+        // === นำ URL ของ Web App จาก Google Apps Script มาใส่ตรงนี้ ===
+        const GAS_URL = "YOUR_WEB_APP_URL_HERE"; 
+
         const video = document.getElementById('video');
         const canvas = document.getElementById('overlay');
-        let lastLogged = 0;
+        const statusText = document.getElementById('system-status');
+        let lastLoggedTime = 0;
 
-        // 1. สร้าง Emojis ลอยไปมา
-        const emojis = ['🏫', '🎒', '📚', '✏️', '🎨', '⚽', '🧪', '😄', '✨'];
-        const container = document.getElementById('emojiContainer');
-        for(let i=0; i<15; i++) {
-            let div = document.createElement('div');
-            div.className = 'emoji';
-            div.innerText = emojis[Math.floor(Math.random()*emojis.length)];
-            div.style.left = Math.random() * 100 + 'vw';
-            div.style.animationDelay = Math.random() * 10 + 's';
-            div.style.fontSize = (Math.random() * 20 + 20) + 'px';
-            container.appendChild(div);
+        // 1. สร้างอิโมจิพื้นหลัง
+        const emojis = ['🏫', '👨‍🏫', '😄', '📚', '🎨', '✨', '💡'];
+        const container = document.getElementById('emoji-container');
+        for(let i=0; i<12; i++) {
+            let span = document.createElement('span');
+            span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            span.style.left = `${Math.random() * 100}vw`;
+            span.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            span.style.animationDelay = `${Math.random() * 5}s`;
+            container.appendChild(span);
         }
 
-        // 2. เริ่มต้น AI และกล้อง
-        async function setupAI() {
-            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'; // แนะนำใช้ CDN แทน
-            await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
-            await faceapi.nets.faceExpressionNet.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
-            
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => { video.srcObject = stream; })
-                .catch(err => alert("ไม่พบกล้อง: " + err));
+        // 2. ฟังก์ชันเริ่มการทำงาน AI อย่างปลอดภัย
+        async function startApp() {
+            try {
+                // เปลี่ยน Path การโหลดโมเดล ไปใช้ jsdelivr ที่เสถียรกว่า (ไม่โดนบล็อกบ่อยเท่า raw.github)
+                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+                
+                statusText.innerHTML = '<i class="fas fa-download"></i> โหลดโมเดล AI สำเร็จ... กำลังเปิดกล้อง';
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+
+                // เริ่มเปิดกล้อง
+                startCamera();
+
+            } catch (error) {
+                console.error("AI Error:", error);
+                statusText.innerHTML = '<span style="color:#ff6b6b;"><i class="fas fa-exclamation-triangle"></i> โหลด AI ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต</span>';
+            }
         }
 
+        // 3. ฟังก์ชันเปิดกล้อง
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false })
+            .then(stream => {
+                video.srcObject = stream;
+                statusText.style.display = 'none'; // ซ่อนข้อความสถานะเมื่อกล้องติดแล้ว
+            })
+            .catch(err => {
+                console.error("Camera Error:", err);
+                statusText.innerHTML = '<span style="color:#ff6b6b;"><i class="fas fa-video-slash"></i> ไม่พบกล้อง หรือถูกบล็อกการเข้าถึง</span>';
+            });
+        }
+
+        // 4. เมื่อวิดีโอเล่น ให้เริ่มประมวลผล AI
         video.addEventListener('play', () => {
-            const displaySize = { width: video.offsetWidth, height: video.offsetHeight };
+            const displaySize = { width: video.width, height: video.height };
             faceapi.matchDimensions(canvas, displaySize);
 
             setInterval(async () => {
+                // ตรวจจับใบหน้าและอารมณ์
                 const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
                 
+                // วาดกรอบและเคลียร์เฟรมเก่า
                 canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
                 faceapi.draw.drawDetections(canvas, resizedDetections);
                 
                 if (detections.length > 0) {
                     const expressions = detections[0].expressions;
+                    // หาอารมณ์ที่ค่าสูงที่สุด
                     const topEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
                     
-                    const emotionMap = {
-                        happy: "มีความสุข 😄", sad: "เศร้า 😢", angry: "โกรธ 😠",
-                        fearful: "หวาดกลัว 😨", disgusted: "รังเกียจ 🤢", surprised: "ประหลาดใจ 😲", neutral: "ปกติ 😐"
-                    };
+                    const emoMap = { happy: "มีความสุข 😄", sad: "เศร้า 😢", angry: "โกรธ 😠", fearful: "หวาดกลัว 😨", disgusted: "รังเกียจ 🤢", surprised: "ประหลาดใจ 😲", neutral: "ปกติ 😐" };
+                    const currentEmotion = emoMap[topEmotion] || topEmotion;
                     
-                    document.getElementById('emotionText').innerText = emotionMap[topEmotion] || topEmotion;
-                    
-                    // บันทึกข้อมูลลง Sheet ทุก 15 วินาที
+                    let behavior = "กำลังสนใจเรียน";
+                    if (topEmotion === 'sad' || topEmotion === 'angry') behavior = "อาจต้องการความช่วยเหลือ";
+
+                    document.getElementById('emotion-text').innerText = currentEmotion;
+                    document.getElementById('behavior-text').innerText = behavior;
+
+                    // ส่งข้อมูลไป Google Sheet ทุกๆ 10 วินาที
                     const now = Date.now();
-                    if (now - lastLogged > 15000) {
-                        saveLog(emotionMap[topEmotion], "กำลังสนใจเรียน");
-                        lastLogged = now;
+                    if (now - lastLoggedTime > 10000) {
+                        saveToSheet(currentEmotion, behavior);
+                        lastLoggedTime = now;
                     }
+                } else {
+                    document.getElementById('emotion-text').innerText = "ไม่พบใบหน้า";
+                    document.getElementById('behavior-text').innerText = "-";
                 }
-            }, 300);
+            }, 500); // ทำงานทุกๆ ครึ่งวินาที
         });
 
-        async function saveLog(emo, beh) {
+        // 5. ฟังก์ชันส่งข้อมูลเข้า Sheet (ทำงานเงียบๆ เบื้องหลัง)
+        function saveToSheet(emotion, behavior) {
+            if(GAS_URL === "YOUR_WEB_APP_URL_HERE") return; // ป้องกันการยิง API หากยังไม่ได้ใส่ URL
             fetch(GAS_URL, {
                 method: "POST",
                 mode: "no-cors",
-                body: JSON.stringify({ emotion: emo, behavior: beh })
-            });
+                body: JSON.stringify({ emotion: emotion, behavior: behavior })
+            }).catch(err => console.log("Save error:", err));
         }
 
-        // 3. ระบบแอดมิน
-        function openAdmin() { document.getElementById('adminModal').style.display = 'flex'; }
-        function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
+        // 6. ระบบแอดมิน
+        const adminModal = document.getElementById('adminModal');
+        function openAdmin() { adminModal.style.display = 'flex'; }
+        function closeAdmin() { adminModal.style.display = 'none'; document.getElementById('data-section').style.display = 'none'; document.getElementById('login-section').style.display = 'block'; }
 
-        async function login() {
-            const pass = document.getElementById('adminPass').value;
-            const res = await fetch(`${GAS_URL}?action=getLogs&pass=${encodeURIComponent(pass)}`);
-            const json = await res.json();
+        async function fetchData() {
+            const pass = document.getElementById('admin-pass').value;
+            if(!pass) return alert("กรุณาใส่รหัสผ่าน");
             
-            if (json.status === "success") {
-                document.getElementById('authArea').style.display = 'none';
-                document.getElementById('dataArea').style.display = 'block';
-                let table = "<table border='1' style='width:100%; border-collapse:collapse'><tr><th>เวลา</th><th>อารมณ์</th><th>ท่าทาง</th></tr>";
-                json.data.slice(1).reverse().forEach(row => {
-                    table += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
-                });
-                table += "</table>";
-                document.getElementById('logTable').innerHTML = table;
-            } else {
-                alert(json.message);
+            try {
+                const res = await fetch(`${GAS_URL}?action=getLogs&pass=${encodeURIComponent(pass)}`);
+                const json = await res.json();
+                
+                if (json.status === "success") {
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('data-section').style.display = 'block';
+                    
+                    let tableHTML = "<table><tr><th>เวลา</th><th>อารมณ์</th><th>พฤติกรรม</th></tr>";
+                    // เอาข้อมูลใหม่ล่าสุดขึ้นก่อน (ข้าม Header แถวแรก)
+                    const dataRows = json.data.slice(1).reverse();
+                    dataRows.forEach(row => {
+                        tableHTML += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                    });
+                    tableHTML += "</table>";
+                    document.getElementById('table-container').innerHTML = tableHTML;
+                } else {
+                    alert(json.msg);
+                }
+            } catch (err) {
+                alert("เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบ URL ของ Web App");
             }
         }
 
-        setupAI();
+        // เริ่มโหลดระบบทันทีที่หน้าเว็บพร้อม
+        window.addEventListener('DOMContentLoaded', startApp);
     </script>
 </body>
 </html>

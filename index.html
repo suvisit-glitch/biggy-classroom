@@ -4,50 +4,251 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ห้องเรียนแห่งความสุขของครูบิ๊กกี้</title>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script defer src="script.js"></script>
+    
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --accent: #fdcb6e;
+            --glass: rgba(255, 255, 255, 0.85);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Prompt', sans-serif;
+            background: #f0f2f5;
+            height: 100vh; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* พื้นหลังโรงเรียนแบบเบลอ */
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=1920') center/cover;
+            filter: blur(10px) brightness(0.7);
+            z-index: -2;
+        }
+
+        /* อิโมจิการ์ตูนเคลื่อนไหว */
+        .floating-emojis {
+            position: fixed; width: 100%; height: 100%; z-index: -1;
+            pointer-events: none; overflow: hidden;
+        }
+        .emoji {
+            position: absolute; bottom: -50px; font-size: 2rem;
+            animation: float 12s linear infinite; opacity: 0.7;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Main Container */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 90%; max-width: 900px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .header h1 { color: var(--primary); margin: 0; font-size: 2rem; }
+        .header p { color: #666; margin: 5px 0 20px; font-size: 1rem; }
+
+        /* Video Area */
+        .camera-box {
+            position: relative;
+            background: #000; border-radius: 16px;
+            overflow: hidden; aspect-ratio: 16/9;
+            margin-bottom: 20px; border: 4px solid white;
+        }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        /* Info Display */
+        .status-bar {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: white; padding: 15px; border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .info-card i { font-size: 1.5rem; color: var(--primary); margin-bottom: 5px; }
+        .info-card span { display: block; font-weight: 600; color: #333; }
+
+        /* Buttons */
+        .btn-admin {
+            background: var(--primary); color: white; border: none;
+            padding: 10px 25px; border-radius: 50px; cursor: pointer;
+            font-family: 'Prompt'; font-weight: 600; transition: 0.3s;
+        }
+        .btn-admin:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); }
+
+        footer { margin-top: 15px; color: #888; font-size: 0.8rem; }
+
+        /* Modal */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100;
+            display: none; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 20px;
+            width: 80%; max-width: 600px; max-height: 80vh; overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
-    <div class="bg-blur"></div>
-    
-    <div class="emoji-bg">
-        <span style="--i:1;">🏫</span><span style="--i:2;">👨‍🏫</span><span style="--i:3;">😄</span><span style="--i:4;">📚</span>
-        <span style="--i:5;">🎨</span><span style="--i:6;">✨</span><span style="--i:7;">💡</span><span style="--i:8;">🏫</span>
+    <div class="bg-overlay"></div>
+    <div class="floating-emojis" id="emojiContainer"></div>
+
+    <div class="glass-panel">
+        <div class="header">
+            <h1><i class="fas fa-school"></i> ห้องเรียนแห่งความสุขของครูบิ๊กกี้</h1>
+            <p>ระบบตรวจเช็คใบหน้า พฤติกรรมของนักเรียน</p>
+        </div>
+
+        <div class="camera-box">
+            <video id="video" autoplay muted></video>
+            <canvas id="overlay"></canvas>
+        </div>
+
+        <div class="status-bar">
+            <div class="info-card">
+                <i class="fas fa-smile"></i>
+                <small>อารมณ์ปัจจุุบัน</small>
+                <span id="emotionText">รอการตรวจจับ...</span>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-walking"></i>
+                <small>พฤติกรรม</small>
+                <span id="behaviorText">ปกติ</span>
+            </div>
+        </div>
+
+        <button class="btn-admin" onclick="openAdmin()">
+            <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+        </button>
+
+        <footer>Dev. by BigGy | © 2024 Classroom AI System</footer>
     </div>
 
-    <div class="container">
-        <header>
-            <h1>ห้องเรียนแห่งความสุขของครูบิ๊กกี้</h1>
-            <h2>ระบบตรวจเช็คใบหน้า พฤติกรรมของนักเรียน</h2>
-        </header>
-
-        <main>
-            <div class="video-wrapper">
-                <video id="video" width="720" height="560" autoplay muted></video>
-                <canvas id="overlay"></canvas>
-            </div>
-            
-            <div class="status-panel">
-                <p>อารมณ์หลักที่พบ: <span id="emotion-status">ปกติ 😐</span></p>
-                <button id="admin-btn">เข้าสู่ระบบผู้ดูแลระบบ <i class="fas fa-lock"></i></button>
-            </div>
-        </main>
-
-        <footer>
-            <p>Dev. by BigGy</p>
-        </footer>
-    </div>
-
-    <div id="admin-modal" class="modal hidden">
+    <div id="adminModal" class="modal">
         <div class="modal-content">
-            <h3>เข้าสู่ระบบหลังบ้าน</h3>
-            <input type="password" id="admin-pass" placeholder="ใส่รหัสผ่าน...">
-            <button id="login-btn">เข้าสู่ระบบ</button>
-            <button id="close-modal">ปิด</button>
-            <div id="admin-data" class="hidden">
-                </div>
+            <h2 style="margin-top:0">ระบบแอดมิน</h2>
+            <div id="authArea">
+                <input type="password" id="adminPass" placeholder="ใส่รหัสผ่าน..." style="width:100%; padding:10px; margin-bottom:10px;">
+                <button onclick="login()" class="btn-admin">ตกลง</button>
+            </div>
+            <div id="dataArea" style="display:none">
+                <div id="logTable">กำลังดึงข้อมูล...</div>
+            </div>
+            <br>
+            <button onclick="closeAdmin()" style="border:none; background:none; color:red; cursor:pointer">ปิดหน้าต่าง</button>
         </div>
     </div>
+
+    <script>
+        const GAS_URL = "ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ที่นี่";
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('overlay');
+        let lastLogged = 0;
+
+        // 1. สร้าง Emojis ลอยไปมา
+        const emojis = ['🏫', '🎒', '📚', '✏️', '🎨', '⚽', '🧪', '😄', '✨'];
+        const container = document.getElementById('emojiContainer');
+        for(let i=0; i<15; i++) {
+            let div = document.createElement('div');
+            div.className = 'emoji';
+            div.innerText = emojis[Math.floor(Math.random()*emojis.length)];
+            div.style.left = Math.random() * 100 + 'vw';
+            div.style.animationDelay = Math.random() * 10 + 's';
+            div.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            container.appendChild(div);
+        }
+
+        // 2. เริ่มต้น AI และกล้อง
+        async function setupAI() {
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights'; // แนะนำใช้ CDN แทน
+            await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
+            await faceapi.nets.faceExpressionNet.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights');
+            
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => { video.srcObject = stream; })
+                .catch(err => alert("ไม่พบกล้อง: " + err));
+        }
+
+        video.addEventListener('play', () => {
+            const displaySize = { width: video.offsetWidth, height: video.offsetHeight };
+            faceapi.matchDimensions(canvas, displaySize);
+
+            setInterval(async () => {
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                
+                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                faceapi.draw.drawDetections(canvas, resizedDetections);
+                
+                if (detections.length > 0) {
+                    const expressions = detections[0].expressions;
+                    const topEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
+                    
+                    const emotionMap = {
+                        happy: "มีความสุข 😄", sad: "เศร้า 😢", angry: "โกรธ 😠",
+                        fearful: "หวาดกลัว 😨", disgusted: "รังเกียจ 🤢", surprised: "ประหลาดใจ 😲", neutral: "ปกติ 😐"
+                    };
+                    
+                    document.getElementById('emotionText').innerText = emotionMap[topEmotion] || topEmotion;
+                    
+                    // บันทึกข้อมูลลง Sheet ทุก 15 วินาที
+                    const now = Date.now();
+                    if (now - lastLogged > 15000) {
+                        saveLog(emotionMap[topEmotion], "กำลังสนใจเรียน");
+                        lastLogged = now;
+                    }
+                }
+            }, 300);
+        });
+
+        async function saveLog(emo, beh) {
+            fetch(GAS_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({ emotion: emo, behavior: beh })
+            });
+        }
+
+        // 3. ระบบแอดมิน
+        function openAdmin() { document.getElementById('adminModal').style.display = 'flex'; }
+        function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
+
+        async function login() {
+            const pass = document.getElementById('adminPass').value;
+            const res = await fetch(`${GAS_URL}?action=getLogs&pass=${encodeURIComponent(pass)}`);
+            const json = await res.json();
+            
+            if (json.status === "success") {
+                document.getElementById('authArea').style.display = 'none';
+                document.getElementById('dataArea').style.display = 'block';
+                let table = "<table border='1' style='width:100%; border-collapse:collapse'><tr><th>เวลา</th><th>อารมณ์</th><th>ท่าทาง</th></tr>";
+                json.data.slice(1).reverse().forEach(row => {
+                    table += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
+                });
+                table += "</table>";
+                document.getElementById('logTable').innerHTML = table;
+            } else {
+                alert(json.message);
+            }
+        }
+
+        setupAI();
+    </script>
 </body>
 </html>

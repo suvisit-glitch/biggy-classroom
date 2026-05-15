@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ห้องเรียนแห่งความสุขของครูบิ๊กกี้</title>
     <link rel="stylesheet" href="style.css">
-    <!-- โหลด AI Model สำหรับตรวจจับใบหน้าและอารมณ์ -->
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script defer src="script.js"></script>
 </head>
 <body>
-    <!-- พื้นหลังโรงเรียนแบบเบลอ -->
     <div class="bg-blur"></div>
     
-    <!-- พื้นหลังอิโมจิเคลื่อนไหว -->
     <div class="emoji-bg">
         <span style="--i:1;">🏫</span><span style="--i:2;">👨‍🏫</span><span style="--i:3;">😄</span><span style="--i:4;">📚</span>
         <span style="--i:5;">🎨</span><span style="--i:6;">✨</span><span style="--i:7;">💡</span><span style="--i:8;">🏫</span>
@@ -27,15 +24,13 @@
 
         <main>
             <div class="video-wrapper">
-                <!-- วิดีโอรับภาพจากกล้อง (หรือ OBS Virtual Camera จาก Imou) -->
                 <video id="video" width="720" height="560" autoplay muted></video>
-                <!-- Canvas สำหรับให้ AI วาดกรอบใบหน้า -->
                 <canvas id="overlay"></canvas>
             </div>
             
             <div class="status-panel">
-                <p>อารมณ์หลักที่พบ: <span id="emotion-status">กำลังประมวลผล...</span></p>
-                <button id="admin-btn">เข้าสู่ระบบแอดมิน</button>
+                <p>อารมณ์หลักที่พบ: <span id="emotion-status">ปกติ 😐</span></p>
+                <button id="admin-btn">เข้าสู่ระบบผู้ดูแลระบบ <i class="fas fa-lock"></i></button>
             </div>
         </main>
 
@@ -44,7 +39,6 @@
         </footer>
     </div>
 
-    <!-- Popup สำหรับ Admin -->
     <div id="admin-modal" class="modal hidden">
         <div class="modal-content">
             <h3>เข้าสู่ระบบหลังบ้าน</h3>
@@ -52,8 +46,7 @@
             <button id="login-btn">เข้าสู่ระบบ</button>
             <button id="close-modal">ปิด</button>
             <div id="admin-data" class="hidden">
-                <!-- ข้อมูลจาก Google Sheet จะแสดงที่นี่ -->
-            </div>
+                </div>
         </div>
     </div>
 </body>

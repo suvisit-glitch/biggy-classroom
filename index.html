@@ -3,264 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ห้องเรียนแห่งความสุขของครูบิ๊กกี้</title>
+    <title>ประตูสู่โลกอนาคต โดย ครูบิ๊กกี้</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        :root {
+            --tech-blue: #00d2ff;
+            --tech-purple: #3a7bd5;
+            --glass: rgba(255, 255, 255, 0.9);
+        }
+
         * { box-sizing: border-box; }
         body, html {
             margin: 0; padding: 0; font-family: 'Prompt', sans-serif;
-            background-color: #e9ecef; height: 100vh; overflow: hidden;
+            height: 100vh; overflow: hidden; background: #0f2027;
             display: flex; justify-content: center; align-items: center;
         }
 
-        /* พื้นหลังโรงเรียนเบลอ */
-        .bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: url('https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&q=80&w=1920') center/cover;
-            filter: blur(12px) brightness(0.7); z-index: -2;
+        /* พื้นหลังล้ำสมัย */
+        .bg-tech {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920&auto=format&fit=crop') center/cover;
+            filter: blur(5px) brightness(0.4); z-index: -2;
         }
 
-        /* อิโมจิลอย */
-        .floating-bg { position: fixed; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        .floating-bg span { position: absolute; bottom: -50px; font-size: 2rem; opacity: 0.6; animation: floatUp linear infinite; }
-        @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-120vh) rotate(360deg); } }
-
-        /* UI หลัก */
-        .app-container {
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
-            border-radius: 20px; padding: 30px; width: 95%; max-width: 850px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3); text-align: center; border: 1px solid rgba(255,255,255,0.5);
-            position: relative;
+        /* อนุภาคอิโมจิลอย (AI, Robot, Tech) */
+        .particles span {
+            position: absolute; bottom: -50px; font-size: 2rem; opacity: 0.5;
+            animation: floatUp 15s linear infinite; z-index: -1;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
         }
 
-        .header h1 { color: #4b4b4b; margin: 0; font-size: 2.2rem; text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
-        .header p { color: #666; margin: 5px 0 20px; font-size: 1.1rem; }
-
-        /* กล่องวิดีโอ (ต้องกำหนดขนาดให้ชัดเจน AI ถึงจะวาดกรอบตรง) */
-        .video-wrapper {
-            position: relative; width: 640px; height: 480px; margin: 0 auto 20px;
-            background: #000; border-radius: 12px; overflow: hidden; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            display: flex; justify-content: center; align-items: center;
+        /* Container หลัก */
+        .main-card {
+            background: var(--glass); backdrop-filter: blur(15px);
+            border-radius: 30px; width: 90%; max-width: 800px;
+            padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center; position: relative; border: 2px solid var(--tech-blue);
         }
-        #video { position: absolute; top: 0; left: 0; width: 640px; height: 480px; object-fit: cover; }
-        #overlay { position: absolute; top: 0; left: 0; z-index: 10; }
-        #system-status { position: absolute; z-index: 5; color: white; font-weight: bold; font-size: 1.2rem; }
 
-        /* กล่องแสดงผลอารมณ์ */
-        .info-panel {
-            display: flex; justify-content: space-around; background: white; padding: 15px;
-            border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        .header h1 { color: #2c3e50; margin: 0; font-size: 2rem; }
+        .header p { color: #555; margin-bottom: 25px; }
+
+        /* ส่วนสแกนใบหน้า */
+        .scan-container { position: relative; width: 480px; height: 360px; margin: 0 auto; border-radius: 20px; overflow: hidden; border: 5px solid #fff; }
+        #video { width: 480px; height: 360px; object-fit: cover; }
+        #overlay { position: absolute; top:0; left:0; }
+        
+        /* แถบพลังรอยยิ้ม */
+        .smile-bar-container { width: 100%; background: #eee; height: 20px; border-radius: 10px; margin-top: 15px; overflow: hidden; display: none; }
+        #smile-progress { width: 0%; height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); transition: 0.3s; }
+
+        /* ส่วนแบบทดสอบ */
+        .quiz-container { display: none; text-align: left; animation: fadeIn 1s; }
+        .question { font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; color: #333; }
+        .option-btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 10px;
+            background: white; border: 2px solid #ddd; border-radius: 12px;
+            cursor: pointer; font-family: 'Prompt'; font-size: 1.1rem; transition: 0.3s;
         }
-        .info-box { flex: 1; }
-        .info-box span { display: block; font-size: 1.2rem; font-weight: bold; color: #6c5ce7; margin-top: 5px; }
+        .option-btn:hover { background: #e3f2fd; border-color: var(--tech-blue); transform: translateX(10px); }
 
-        .btn-admin {
-            background: #6c5ce7; color: white; border: none; padding: 12px 30px; font-size: 1rem;
-            border-radius: 30px; cursor: pointer; transition: 0.3s; font-family: 'Prompt'; font-weight: 600;
-        }
-        .btn-admin:hover { background: #5a4bcf; transform: scale(1.05); }
+        /* ส่วนสรุปผล */
+        .result-container { display: none; animation: zoomIn 0.8s; }
+        .career-title { font-size: 2.5rem; color: var(--tech-purple); font-weight: bold; }
+        .encourage-text { font-size: 1.2rem; color: #444; margin: 20px 0; line-height: 1.6; }
 
-        footer { margin-top: 20px; color: #555; font-size: 0.9rem; font-weight: 600; }
+        footer { margin-top: 30px; font-weight: bold; color: #2c3e50; opacity: 0.8; }
 
-        /* Modal แอดมิน */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8);
-            z-index: 100; display: none; justify-content: center; align-items: center;
-        }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 700px; max-height: 80vh; overflow-y: auto; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
-        table, th, td { border: 1px solid #ddd; } th, td { padding: 10px; text-align: left; } th { background-color: #f2f2f2; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
-    <div class="bg-overlay"></div>
-    <div class="floating-bg" id="emoji-container"></div>
+    <div class="bg-tech"></div>
+    <div class="particles" id="particles"></div>
 
-    <div class="app-container">
-        <div class="header">
-            <h1><i class="fas fa-school"></i> ห้องเรียนแห่งความสุขของครูบิ๊กกี้</h1>
-            <p>ระบบตรวจเช็คใบหน้า พฤติกรรมของนักเรียน</p>
+    <div class="main-card">
+        <div id="scan-step">
+            <div class="header">
+                <h1><i class="fas fa-robot"></i> ด่านตรวจความสุข</h1>
+                <p>ยิ้มกว้างๆ ให้กล้องเป็นเวลา 5 วินาที เพื่อเปิดประตูสู่โลกอนาคตนะ!</p>
+            </div>
+            <div class="scan-container">
+                <video id="video" autoplay muted playsinline></video>
+                <canvas id="overlay"></canvas>
+            </div>
+            <div class="smile-bar-container" id="bar-ui">
+                <div id="smile-progress"></div>
+            </div>
+            <p id="status-msg">กำลังโหลด AI...</p>
         </div>
 
-        <div class="video-wrapper">
-            <div id="system-status"><i class="fas fa-spinner fa-spin"></i> กำลังโหลดระบบ AI... กรุณารอสักครู่</div>
-            <video id="video" width="640" height="480" autoplay muted playsinline></video>
-            <canvas id="overlay" width="640" height="480"></canvas>
+        <div id="quiz-step" class="quiz-container">
+            <div id="quiz-content">
+                </div>
         </div>
 
-        <div class="info-panel">
-            <div class="info-box">
-                <small><i class="fas fa-smile"></i> อารมณ์ปัจจุบัน</small>
-                <span id="emotion-text">รอการตรวจจับ...</span>
-            </div>
-            <div class="info-box">
-                <small><i class="fas fa-child"></i> พฤติกรรม / ท่าทาง</small>
-                <span id="behavior-text">ปกติ</span>
-            </div>
+        <div id="result-step" class="result-container">
+            <h2 id="result-emoji" style="font-size: 4rem;">🤖</h2>
+            <div class="career-title" id="career-name">นักวิเคราะห์ AI</div>
+            <div class="encourage-text" id="encourage-msg"></div>
+            <button class="option-btn" onclick="location.reload()" style="background: var(--tech-blue); color:white;">ทำใหม่อีกครั้ง <i class="fas fa-redo"></i></button>
         </div>
 
-        <button class="btn-admin" onclick="openAdmin()"><i class="fas fa-lock"></i> เข้าสู่ระบบแอดมิน</button>
-        <footer>Dev. by BigGy | © 2024</footer>
-    </div>
-
-    <div class="modal" id="adminModal">
-        <div class="modal-content">
-            <h2>ข้อมูลหลังบ้าน</h2>
-            <div id="login-section">
-                <input type="password" id="admin-pass" placeholder="ใส่รหัสผ่าน 880 บิ๊กกี้ok" style="padding:10px; width:80%; margin-bottom:10px; font-family:'Prompt';">
-                <br>
-                <button class="btn-admin" onclick="fetchData()">ดูข้อมูล</button>
-            </div>
-            <div id="data-section" style="display:none;">
-                <div id="table-container"></div>
-            </div>
-            <br><br>
-            <button onclick="closeAdmin()" style="background: none; border: none; color: red; cursor: pointer; font-family:'Prompt'; text-decoration: underline;">ปิดหน้าต่าง</button>
-        </div>
+        <footer>
+            สื่อสร้างสรรค์ โดย ครูบิ๊กกี้ | <i class="fas fa-code"></i> AI Tech Lab
+        </footer>
     </div>
 
     <script>
-        // === นำ URL ของ Web App จาก Google Apps Script มาใส่ตรงนี้ ===
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbx1-HzmAtM1RB2deuiF_8f9MsJEhw6WOROq_cw30uZ-KhUzBCgwrRLWjxNKAr7SnPo/exec"; 
+        const GAS_URL = "ใส่_URL_ของ_GOOGLE_APPS_SCRIPT_ที่นี่";
+        
+        let smileStartTime = null;
+        const smileTarget = 5000; // 5 วินาที
+        let isSuccess = false;
+
+        // 1. สร้างอนุภาค Tech ลอย
+        const techIcons = ['🤖', '💻', '🚀', '🛰️', '👾', '💾', '⚙️', '💡'];
+        const pContainer = document.getElementById('particles');
+        for(let i=0; i<15; i++) {
+            let s = document.createElement('span');
+            s.innerText = techIcons[Math.floor(Math.random()*techIcons.length)];
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.animationDuration = (Math.random() * 5 + 10) + 's';
+            s.style.animationDelay = (Math.random() * 5) + 's';
+            pContainer.appendChild(s);
+        }
+
+        // 2. โหลด AI และกล้อง
+        async function init() {
+            const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+            await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+            
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    document.getElementById('video').srcObject = stream;
+                    document.getElementById('status-msg').innerText = "เตรียมตัวนะ... ยิ้มเลย!";
+                    document.getElementById('bar-ui').style.display = 'block';
+                })
+                .catch(err => Swal.fire('ไม่พบกล้อง', 'กรุณาตรวจสอบการเชื่อมต่อกล้องนะ', 'error'));
+        }
 
         const video = document.getElementById('video');
-        const canvas = document.getElementById('overlay');
-        const statusText = document.getElementById('system-status');
-        let lastLoggedTime = 0;
-
-        // 1. สร้างอิโมจิพื้นหลัง
-        const emojis = ['🏫', '👨‍🏫', '😄', '📚', '🎨', '✨', '💡'];
-        const container = document.getElementById('emoji-container');
-        for(let i=0; i<12; i++) {
-            let span = document.createElement('span');
-            span.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            span.style.left = `${Math.random() * 100}vw`;
-            span.style.animationDuration = `${Math.random() * 10 + 10}s`;
-            span.style.animationDelay = `${Math.random() * 5}s`;
-            container.appendChild(span);
-        }
-
-        // 2. ฟังก์ชันเริ่มการทำงาน AI อย่างปลอดภัย
-        async function startApp() {
-            try {
-                // เปลี่ยน Path การโหลดโมเดล ไปใช้ jsdelivr ที่เสถียรกว่า (ไม่โดนบล็อกบ่อยเท่า raw.github)
-                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
-                
-                statusText.innerHTML = '<i class="fas fa-download"></i> โหลดโมเดล AI สำเร็จ... กำลังเปิดกล้อง';
-                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-                await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
-
-                // เริ่มเปิดกล้อง
-                startCamera();
-
-            } catch (error) {
-                console.error("AI Error:", error);
-                statusText.innerHTML = '<span style="color:#ff6b6b;"><i class="fas fa-exclamation-triangle"></i> โหลด AI ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต</span>';
-            }
-        }
-
-        // 3. ฟังก์ชันเปิดกล้อง
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false })
-            .then(stream => {
-                video.srcObject = stream;
-                statusText.style.display = 'none'; // ซ่อนข้อความสถานะเมื่อกล้องติดแล้ว
-            })
-            .catch(err => {
-                console.error("Camera Error:", err);
-                statusText.innerHTML = '<span style="color:#ff6b6b;"><i class="fas fa-video-slash"></i> ไม่พบกล้อง หรือถูกบล็อกการเข้าถึง</span>';
-            });
-        }
-
-        // 4. เมื่อวิดีโอเล่น ให้เริ่มประมวลผล AI
         video.addEventListener('play', () => {
-            const displaySize = { width: video.width, height: video.height };
+            const canvas = document.getElementById('overlay');
+            const displaySize = { width: 480, height: 360 };
             faceapi.matchDimensions(canvas, displaySize);
 
             setInterval(async () => {
-                // ตรวจจับใบหน้าและอารมณ์
+                if(isSuccess) return;
+
                 const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceExpressions();
-                const resizedDetections = faceapi.resizeResults(detections, displaySize);
-                
-                // วาดกรอบและเคลียร์เฟรมเก่า
-                canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-                faceapi.draw.drawDetections(canvas, resizedDetections);
-                
+                const resized = faceapi.resizeResults(detections, displaySize);
+                canvas.getContext('2d').clearRect(0, 0, 480, 360);
+                faceapi.draw.drawDetections(canvas, resized);
+
                 if (detections.length > 0) {
                     const expressions = detections[0].expressions;
-                    // หาอารมณ์ที่ค่าสูงที่สุด
-                    const topEmotion = Object.keys(expressions).reduce((a, b) => expressions[a] > expressions[b] ? a : b);
-                    
-                    const emoMap = { happy: "มีความสุข 😄", sad: "เศร้า 😢", angry: "โกรธ 😠", fearful: "หวาดกลัว 😨", disgusted: "รังเกียจ 🤢", surprised: "ประหลาดใจ 😲", neutral: "ปกติ 😐" };
-                    const currentEmotion = emoMap[topEmotion] || topEmotion;
-                    
-                    let behavior = "กำลังสนใจเรียน";
-                    if (topEmotion === 'sad' || topEmotion === 'angry') behavior = "อาจต้องการความช่วยเหลือ";
+                    if (expressions.happy > 0.8) {
+                        if (!smileStartTime) smileStartTime = Date.now();
+                        const elapsed = Date.now() - smileStartTime;
+                        const progress = Math.min((elapsed / smileTarget) * 100, 100);
+                        document.getElementById('smile-progress').style.width = progress + '%';
 
-                    document.getElementById('emotion-text').innerText = currentEmotion;
-                    document.getElementById('behavior-text').innerText = behavior;
-
-                    // ส่งข้อมูลไป Google Sheet ทุกๆ 10 วินาที
-                    const now = Date.now();
-                    if (now - lastLoggedTime > 10000) {
-                        saveToSheet(currentEmotion, behavior);
-                        lastLoggedTime = now;
+                        if (elapsed >= smileTarget) {
+                            isSuccess = true;
+                            smileSuccess();
+                        }
+                    } else {
+                        if(smileStartTime) {
+                            smileStartTime = null;
+                            document.getElementById('smile-progress').style.width = '0%';
+                            document.getElementById('status-msg').innerText = "อย่าเพิ่งหุบยิ้ม! เริ่มนับใหม่นะ...";
+                        }
                     }
-                } else {
-                    document.getElementById('emotion-text').innerText = "ไม่พบใบหน้า";
-                    document.getElementById('behavior-text').innerText = "-";
                 }
-            }, 500); // ทำงานทุกๆ ครึ่งวินาที
+            }, 100);
         });
 
-        // 5. ฟังก์ชันส่งข้อมูลเข้า Sheet (ทำงานเงียบๆ เบื้องหลัง)
-        function saveToSheet(emotion, behavior) {
-            if(GAS_URL === "YOUR_WEB_APP_URL_HERE") return; // ป้องกันการยิง API หากยังไม่ได้ใส่ URL
-            fetch(GAS_URL, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify({ emotion: emotion, behavior: behavior })
-            }).catch(err => console.log("Save error:", err));
+        function smileSuccess() {
+            Swal.fire({
+                title: 'รอยยิ้มสุดยอดเลย!',
+                text: 'ประตูเปิดออกแล้ว ไปทำแบบทดสอบกัน!',
+                icon: 'success',
+                confirmButtonText: 'ไปกันเลย 🚀'
+            }).then(() => {
+                document.getElementById('scan-step').style.display = 'none';
+                document.getElementById('quiz-step').style.display = 'block';
+                startQuiz();
+            });
         }
 
-        // 6. ระบบแอดมิน
-        const adminModal = document.getElementById('adminModal');
-        function openAdmin() { adminModal.style.display = 'flex'; }
-        function closeAdmin() { adminModal.style.display = 'none'; document.getElementById('data-section').style.display = 'none'; document.getElementById('login-section').style.display = 'block'; }
+        // 3. ระบบแบบทดสอบจิตวิทยา
+        const quizData = [
+            {
+                q: "ถ้ามีหุ่นยนต์ 1 ตัว เธออยากให้มันทำอะไรให้?",
+                options: [
+                    { t: "เขียนโปรแกรมและแก้โจทย์เลขยากๆ", type: "tech" },
+                    { t: "ช่วยดูแลคนป่วยและพูดคุยให้กำลังใจ", type: "social" },
+                    { t: "ออกแบบชุดสวยๆ และวาดรูป", type: "creative" }
+                ]
+            },
+            {
+                q: "เวลาว่าง เธอชอบทำอะไรมากที่สุด?",
+                options: [
+                    { t: "แกะของเล่นออกมาดูระบบข้างใน", type: "tech" },
+                    { t: "ปลูกต้นไม้หรือช่วยเหลือสัตว์", type: "social" },
+                    { t: "แต่งนิทานหรือถ่ายคลิปวิดีโอ", type: "creative" }
+                ]
+            }
+        ];
 
-        async function fetchData() {
-            const pass = document.getElementById('admin-pass').value;
-            if(!pass) return alert("กรุณาใส่รหัสผ่าน");
-            
-            try {
-                const res = await fetch(`${GAS_URL}?action=getLogs&pass=${encodeURIComponent(pass)}`);
-                const json = await res.json();
-                
-                if (json.status === "success") {
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('data-section').style.display = 'block';
-                    
-                    let tableHTML = "<table><tr><th>เวลา</th><th>อารมณ์</th><th>พฤติกรรม</th></tr>";
-                    // เอาข้อมูลใหม่ล่าสุดขึ้นก่อน (ข้าม Header แถวแรก)
-                    const dataRows = json.data.slice(1).reverse();
-                    dataRows.forEach(row => {
-                        tableHTML += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`;
-                    });
-                    tableHTML += "</table>";
-                    document.getElementById('table-container').innerHTML = tableHTML;
-                } else {
-                    alert(json.msg);
-                }
-            } catch (err) {
-                alert("เกิดข้อผิดพลาดในการดึงข้อมูล โปรดตรวจสอบ URL ของ Web App");
+        let currentQ = 0;
+        let scores = { tech: 0, social: 0, creative: 0 };
+
+        function startQuiz() {
+            const q = quizData[currentQ];
+            let html = `<div class="question">${currentQ+1}. ${q.q}</div>`;
+            q.options.forEach(opt => {
+                html += `<button class="option-btn" onclick="answerQuiz('${opt.type}')">${opt.t}</button>`;
+            });
+            document.getElementById('quiz-content').innerHTML = html;
+        }
+
+        function answerQuiz(type) {
+            scores[type]++;
+            currentQ++;
+            if(currentQ < quizData.length) {
+                startQuiz();
+            } else {
+                showResult();
             }
         }
 
-        // เริ่มโหลดระบบทันทีที่หน้าเว็บพร้อม
-        window.addEventListener('DOMContentLoaded', startApp);
+        // 4. สรุปผล
+        function showResult() {
+            document.getElementById('quiz-step').style.display = 'none';
+            document.getElementById('result-step').style.display = 'block';
+
+            let finalType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            
+            const results = {
+                tech: { 
+                    name: "วิศวกรซอฟต์แวร์อนาคต", 
+                    emoji: "🚀", 
+                    msg: "เธอมีความคิดที่เป็นระบบและหลงใหลในเทคโนโลยี! โลกต้องการนักสร้างอย่างเธอนะ ครูบิ๊กกี้ขอเป็นกำลังใจให้เธอสร้างนวัตกรรมที่เปลี่ยนโลกได้!" 
+                },
+                social: { 
+                    name: "ที่ปรึกษาด้านความสุข", 
+                    emoji: "💖", 
+                    msg: "ใจที่อ่อนโยนของเธอคือพลังที่ยิ่งใหญ่! อาชีพที่ได้ช่วยเหลือผู้อื่นจะทำให้เธอมีความสุขที่สุด เดินตามความฝันนะ ครูบิ๊กกี้อยู่ข้างๆ เสมอ!" 
+                },
+                creative: { 
+                    name: "นักออกแบบโลกเสมือน (Metaverse)", 
+                    emoji: "🎨", 
+                    msg: "จินตนาการของเธอไม่มีที่สิ้นสุด! อย่าหยุดสร้างสรรค์สิ่งใหม่ๆ นะ เพราะความสวยงามของโลกนี้ขึ้นอยู่กับปลายพู่กันของเธอ!" 
+                }
+            };
+
+            const final = results[finalType];
+            document.getElementById('career-name').innerText = final.name;
+            document.getElementById('result-emoji').innerText = final.emoji;
+            document.getElementById('encourage-msg').innerText = final.msg;
+
+            // ส่งข้อมูลลง Sheet
+            fetch(GAS_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({ career: final.name, message: final.msg })
+            });
+        }
+
+        init();
     </script>
 </body>
 </html>

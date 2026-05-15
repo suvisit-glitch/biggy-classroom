@@ -1,5 +1,5 @@
 // นำ URL ของ Web App ที่ได้จาก Google Apps Script มาใส่ที่นี่
-const GAS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwZDasn7a0jTWJwWmwfqG3nwByyQ25e5TpOJkdjKcjPl6Zj1MEoCVFKMUCDC3yLDs9k/exec';
 
 const video = document.getElementById('video');
 const emotionStatus = document.getElementById('emotion-status');
